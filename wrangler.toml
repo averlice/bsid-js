@@ -1,0 +1,16 @@
+name = "bsid-js"
+main = "src/server.js"
+compatibility_date = "2023-10-25"
+compatibility_flags = ["nodejs_compat"]
+
+# Define your custom domain here if you have one
+# routes = [
+# 	{ pattern = "your.custom.domain", custom_domain = true }
+# ]
+
+[vars]
+# Placeholder variables (should be set via 'wrangler secret put' for production)
+# DISCORD_APPLICATION_ID = ""
+# DISCORD_PUBLIC_KEY = ""
+# GEMINI_API_KEY = ""
+# OWNER_IDS = ""

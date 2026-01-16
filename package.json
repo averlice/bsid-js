@@ -1,0 +1,20 @@
+{
+  "name": "bsid-js",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A serverless Gemini Discord Bot for Cloudflare Workers.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "register": "node tools/register.js"
+  },
+  "dependencies": {
+    "discord-interactions": "^3.4.0",
+    "itty-router": "^4.0.23"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "wrangler": "^3.0.0"
+  }
+}

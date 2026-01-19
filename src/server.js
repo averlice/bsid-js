@@ -203,7 +203,7 @@ router.post('/', async (request, env, ctx) => {
 
                 await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with Gemini...**');
                 
-                const text = await generateGeminiResponse("Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene.", GEMINI_API_KEY, new Uint8Array(arrayBuffer), attachment.content_type, model);
+                const text = await generateGeminiResponse("Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.", GEMINI_API_KEY, new Uint8Array(arrayBuffer), attachment.content_type, model);
                 return `**Image Description (${model}):**\n${text}`;
             }
 
@@ -265,7 +265,7 @@ router.post('/', async (request, env, ctx) => {
                 await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with Gemini...**');
                 
                 const text = await generateGeminiResponse(
-                    "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene.", 
+                    "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.", 
                     GEMINI_API_KEY, 
                     new Uint8Array(arrayBuffer), 
                     attachment.content_type, 

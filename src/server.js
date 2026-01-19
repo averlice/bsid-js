@@ -13,6 +13,12 @@ function hexToUint8Array(hex) {
 const encoder = new TextEncoder();
 let CACHED_PUBLIC_KEY = null;
 
+// Helper to truncate long messages
+function truncateMessage(text, limit = 1900) {
+  if (text.length <= limit) return text;
+  return text.substring(0, limit) + '... (truncated)';
+}
+
 router.get('/', (request, env) => {
   const hasKey = !!env.DISCORD_PUBLIC_KEY;
   return new Response(`✅ Worker is LIVE\n🔑 Secrets: ${hasKey ? 'Loaded' : 'Missing'}\n\nUse this URL in Discord Developer Portal!`, {
@@ -204,7 +210,7 @@ router.post('/', async (request, env, ctx) => {
                 await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with Gemini...**');
                 
                 const text = await generateGeminiResponse("Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.", GEMINI_API_KEY, new Uint8Array(arrayBuffer), attachment.content_type, model);
-                return `**Image Description (${model}):**\n${text}`;
+                return truncateMessage(`**Image Description (${model}):**\n${text}`);
             }
 
             if (name === 'ocr') {
@@ -233,7 +239,7 @@ router.post('/', async (request, env, ctx) => {
                     attachment.content_type, 
                     model
                 );
-                return `**OCR Result (${model}):**\n${text}`;
+                return truncateMessage(`**OCR Result (${model}):**\n${text}`);
             }
 
             if (name === 'Describe Image') {
@@ -271,7 +277,7 @@ router.post('/', async (request, env, ctx) => {
                     attachment.content_type, 
                     'gemini-3-flash-preview' // Default model for context menu
                 );
-                return `**Image Description:**\n${text}`;
+                return truncateMessage(`**Image Description:**\n${text}`);
             }
         };
 

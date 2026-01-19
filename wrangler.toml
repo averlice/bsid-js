@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 # ]
 
 [vars]
-# Placeholder variables (should be set via 'wrangler secret put' for production)
+# You will need to set these in your Cloudflare dashboard or .dev.vars for local dev
 # DISCORD_APPLICATION_ID = ""
 # DISCORD_PUBLIC_KEY = ""
 # GEMINI_API_KEY = ""

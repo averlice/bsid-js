@@ -16,10 +16,14 @@ const commands = [
   {
     name: 'ping',
     description: 'Replies with Pong! and checks status.',
+    integration_types: [0, 1],
+    contexts: [0, 1, 2]
   },
   {
     name: 'test',
     description: 'Tests connection to Gemini API.',
+    integration_types: [0, 1],
+    contexts: [0, 1, 2],
     options: [
         {
             name: 'model',
@@ -36,6 +40,8 @@ const commands = [
   {
     name: 'gemini',
     description: 'Ask Gemini a question',
+    integration_types: [0, 1],
+    contexts: [0, 1, 2],
     options: [
         {
             name: 'prompt',
@@ -58,6 +64,8 @@ const commands = [
   {
     name: 'describe',
     description: 'Describes an attached image using Gemini.',
+    integration_types: [0, 1],
+    contexts: [0, 1, 2],
     options: [
         {
             name: 'image',
@@ -76,6 +84,36 @@ const commands = [
             ]
         }
     ]
+  },
+  {
+    name: 'ocr',
+    description: 'Extracts text from an image (Optical Character Recognition).',
+    integration_types: [0, 1],
+    contexts: [0, 1, 2],
+    options: [
+        {
+            name: 'image',
+            description: 'The image to read text from',
+            type: 11, // ATTACHMENT
+            required: true
+        },
+        {
+            name: 'model',
+            description: 'Specify the model to use (default: gemini-1.5-flash)',
+            type: 3, // STRING
+            required: false,
+             choices: [
+                { name: 'Gemini 3 Flash (Preview)', value: 'gemini-3-flash-preview' },
+                { name: 'Gemini 3 Pro (Preview)', value: 'gemini-3-pro-preview' }
+            ]
+        }
+    ]
+  },
+  {
+    name: 'Describe Image',
+    type: 3, // MESSAGE context menu
+    integration_types: [0, 1],
+    contexts: [0, 1, 2]
   },
   {
     name: 'say',

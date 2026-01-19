@@ -60,6 +60,6 @@ export async function generateGeminiResponse(prompt, apiKey, imageBuffer = null,
 
   } catch (error) {
     console.error("Fetch Error:", error);
-    return "Failed to contact Gemini API.";
+    return `Failed to contact Gemini API: ${error.message}`;
   }
 }

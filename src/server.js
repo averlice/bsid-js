@@ -303,6 +303,75 @@ router.post('/', async (request, env, ctx) => {
             data: { content: message },
         }), { headers: { 'Content-Type': 'application/json' } });
     }
+
+    // --- Command: /logs (Owner Only) ---
+    if (name === 'logs') {
+        const ownerIds = env.OWNER_IDS ? env.OWNER_IDS.split(',') : [];
+        const userId = interaction.member?.user?.id || interaction.user?.id;
+
+        if (!ownerIds.includes(userId)) {
+            return new Response(JSON.stringify({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: { content: '❌ Error: This command is restricted to bot owners only.', flags: 64 },
+            }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        const cfToken = env.CLOUDFLARE_API_TOKEN;
+        const cfAccount = env.CLOUDFLARE_ACCOUNT_ID;
+
+        if (!cfToken || !cfAccount) {
+             return new Response(JSON.stringify({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: { content: '❌ Error: `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` is missing in environment variables.', flags: 64 },
+            }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Defer response because external API calls might take >3s
+        const response = new Response(JSON.stringify({ type: 5 }), { 
+            headers: { 'Content-Type': 'application/json' } 
+        });
+
+        const logLogic = async () => {
+            try {
+                const resp = await fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccount}/audit_logs?per_page=10&direction=desc`, {
+                    headers: {
+                        'Authorization': `Bearer ${cfToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`Cloudflare API ${resp.status}: ${await resp.text()}`);
+                }
+
+                const data = await resp.json();
+                if (!data.success) throw new Error("Cloudflare API returned success: false");
+
+                const logs = data.result.map(log => {
+                    const time = new Date(log.when).toLocaleString();
+                    const action = log.action.type;
+                    const actor = log.actor.email || log.actor.ip || "Unknown";
+                    const resource = log.resource ? log.resource.name : "N/A";
+                    return `**[${time}]**\n👤 
+${actor}
+🛠️ 
+${action}
+ → 
+${resource}`;
+                }).join('\n\n');
+
+                return {
+                    content: logs ? `## 🛡️ Recent Cloudflare Audit Logs\n${logs}` : "No recent audit logs found."
+                };
+
+            } catch (e) {
+                return `❌ **Audit Log Error:** ${e.message}`;
+            }
+        };
+
+        ctx.waitUntil(handleDeferredExecution(DISCORD_APPLICATION_ID, interaction.token, logLogic()));
+        return response;
+    }
   }
 
   return new Response(JSON.stringify({ error: 'Unknown Command or Interaction' }), { status: 400 });

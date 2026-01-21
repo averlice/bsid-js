@@ -143,6 +143,10 @@ const commands = [
     name: 'testembed',
     description: 'Debug: Sends a hard-coded test embed.'
   },
+  {
+    name: 'logs',
+    description: 'Bot Owner Only: Fetches recent Cloudflare Audit Logs for this account.'
+  },
 ];
 
 async function registerCommands() {

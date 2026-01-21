@@ -8,9 +8,14 @@ compatibility_flags = ["nodejs_compat"]
 # 	{ pattern = "your.custom.domain", custom_domain = true }
 # ]
 
+[placement]
+mode = "smart"
+
 [vars]
 # You will need to set these in your Cloudflare dashboard or .dev.vars for local dev
 # DISCORD_APPLICATION_ID = ""
 # DISCORD_PUBLIC_KEY = ""
 # GEMINI_API_KEY = ""
 # OWNER_IDS = ""
+# CLOUDFLARE_ACCOUNT_ID = ""
+# CLOUDFLARE_API_TOKEN = ""

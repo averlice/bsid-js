@@ -3,6 +3,7 @@ import { InteractionResponseType, InteractionType } from 'discord-interactions';
 import { generateGeminiResponse } from './gemini.js';
 
 const router = Router();
+const CURRENT_COMMIT_HASH = '710561a9d3c2828be579216a75e153fee84bc17a'; // Set during build/push
 
 // Helper to convert hex strings to Uint8Array
 function hexToUint8Array(hex) {
@@ -61,6 +62,53 @@ async function handleDeferredExecution(applicationId, interactionToken, resultPr
                 body: JSON.stringify({ content: `❌ **Bot Error:** ${err.message}` })
             });
         } catch (e) {}
+    }
+}
+
+async function checkUpdates(env) {
+    try {
+        const resp = await fetch('https://api.github.com/repos/averlice/bsid-js/commits/main', {
+            headers: { 'User-Agent': 'BSID-Worker-Updater' }
+        });
+        
+        if (!resp.ok) return; // Silent fail
+
+        const data = await resp.json();
+        const remoteHash = data.sha;
+
+        if (remoteHash && remoteHash !== CURRENT_COMMIT_HASH) {
+            // Notify Owners
+            const ownerIds = env.OWNER_IDS ? env.OWNER_IDS.split(',') : [];
+            const token = env.DISCORD_TOKEN;
+            
+            for (const ownerId of ownerIds) {
+                // Create DM Channel
+                const channelResp = await fetch('https://discord.com/api/v10/users/@me/channels', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bot ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ recipient_id: ownerId })
+                });
+
+                if (channelResp.ok) {
+                    const channel = await channelResp.json();
+                    await fetch(`https://discord.com/api/v10/channels/${channel.id}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bot ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content: `🚀 **Update Available!**\nA new commit has been pushed to the `bsid-js` repository.\n\n**Current:** `${CURRENT_COMMIT_HASH.substring(0,7)}`\n**Latest:** `${remoteHash.substring(0,7)}`\n\n[View Changes](<${data.html_url}>)`
+                        })
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Update Check Error:", e);
     }
 }
 
@@ -139,27 +187,13 @@ router.post('/', async (request, env, ctx) => {
             title: "🏓 Pong!",
             color: 0x00ff00,
             fields: [
-                { name: "📡 Gateway Latency", value: `
-${gatewayLatency}ms
-`, inline: true },
-                { name: "⚙️ Worker Execution", value: `
-${executionLatency}ms
-`, inline: true },
-                { name: "☁️ Cloudflare Node", value: `
-${colo}
-`, inline: true },
-                { name: "🆔 Ray ID", value: `
-${rayId}
-`, inline: false },
-                { name: "🛡️ Protocol", value: `
-${protocol}
-`, inline: true },
-                { name: "🔒 TLS Version", value: `
-${tlsVersion}
-`, inline: true },
-                { name: "🏢 ASN", value: `
-${asn} (${asOrg})
-`, inline: false },
+                { name: "📡 Gateway Latency", value: ``${gatewayLatency}ms``, inline: true },
+                { name: "⚙️ Worker Execution", value: ``${executionLatency}ms``, inline: true },
+                { name: "☁️ Cloudflare Node", value: ``${colo}``, inline: true },
+                { name: "🆔 Ray ID", value: ``${rayId}``, inline: false },
+                { name: "🛡️ Protocol", value: ``${protocol}``, inline: true },
+                { name: "🔒 TLS Version", value: ``${tlsVersion}``, inline: true },
+                { name: "🏢 ASN", value: ``${asn} (${asOrg})``, inline: false },
                 { name: "🌍 Location", value: `${city}, ${region}, ${country}`, inline: false }
             ],
             footer: { text: `Serverless • Smart Placement • Cloudflare Worker` }
@@ -378,12 +412,7 @@ ${asn} (${asOrg})
                     const action = log.action.type;
                     const actor = log.actor.email || log.actor.ip || "Unknown";
                     const resource = log.resource ? log.resource.name : "N/A";
-                    return `**[${time}]**\n👤 
-${actor}
-🛠️ 
-${action}
- → 
-${resource}`;
+                    return `**[${time}]**\n👤 `${actor}`\n🛠️ `${action}` → `${resource}``;
                 }).join('\n\n');
 
                 return {
@@ -405,4 +434,10 @@ ${resource}`;
 
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
-export default { fetch: router.fetch };
+export default {
+    fetch: router.fetch,
+    scheduled: async (event, env, ctx) => {
+        // Runs via Cron Trigger
+        ctx.waitUntil(checkUpdates(env));
+    }
+};

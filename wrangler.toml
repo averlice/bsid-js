@@ -11,6 +11,9 @@ compatibility_flags = ["nodejs_compat"]
 [placement]
 mode = "smart"
 
+[triggers]
+crons = ["0 * * * *"] # Every hour
+
 [vars]
 # You will need to set these in your Cloudflare dashboard or .dev.vars for local dev
 # DISCORD_APPLICATION_ID = ""

@@ -74,7 +74,14 @@ To have your bot automatically redeploy when you modify code on GitHub, follow t
 | `GEMINI_API_KEY` | Your AI Studio API Key. |
 | `OWNER_IDS` | Comma-separated user IDs (e.g., `12345,67890`) |
 
-Once these are set, any push to the `main` branch will automatically deploy your bot!
+<p>your bot should now be up to date and stay that way!</p>
+
+### Auto-Sync with Developer
+This repository includes a `Sync with Upstream` workflow. It checks the main developer repository (`averlice/bsid-js`) every hour. If there are updates, it pulls them into your fork automatically.
+- **Combined with the Deploy workflow**, this means your bot effectively updates itself entirely on its own!
+
+<h1>how do i play with the bot?</h1>
+
 
 ---
 

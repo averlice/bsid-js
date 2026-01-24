@@ -127,6 +127,9 @@ router.post('/', async (request, env, ctx) => {
         const city = request.cf?.city || 'Unknown City';
         const country = request.cf?.country || 'Unknown Country';
         const region = request.cf?.region || 'Unknown Region';
+        const host = request.headers.get('host') || 'Unknown Domain';
+        const protocol = request.cf?.httpProtocol || 'Unknown';
+        const asn = request.cf?.asn || 'Unknown';
 
         const embed = {
             title: "🏓 Pong!",
@@ -134,9 +137,12 @@ router.post('/', async (request, env, ctx) => {
             fields: [
                 { name: "📡 Interaction Latency", value: `\`${latency}ms\``, inline: true },
                 { name: "☁️ Cloudflare Node", value: `\`${colo}\``, inline: true },
+                { name: "🌐 Domain", value: `\`${host}\``, inline: true },
+                { name: "🛡️ Protocol", value: `\`${protocol}\``, inline: true },
+                { name: "🆔 ASN", value: `\`${asn}\``, inline: true },
                 { name: "🌍 Location", value: `${city}, ${region}, ${country}`, inline: false }
             ],
-            footer: { text: `App ID: ${DISCORD_APPLICATION_ID} • Serverless` }
+            footer: { text: `App ID: ${DISCORD_APPLICATION_ID} • Serverless • Smart Placement` }
         };
 
         return new Response(JSON.stringify({

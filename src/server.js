@@ -65,6 +65,7 @@ async function handleDeferredExecution(applicationId, interactionToken, resultPr
 }
 
 router.post('/', async (request, env, ctx) => {
+  const workerStartTime = Date.now();
   const { DISCORD_PUBLIC_KEY, GEMINI_API_KEY, DISCORD_APPLICATION_ID } = env;
   
   const signature = request.headers.get('x-signature-ed25519');
@@ -120,29 +121,48 @@ router.post('/', async (request, env, ctx) => {
     // --- Command: /ping ---
     if (name === 'ping') {
         const now = Date.now();
-        const latency = timestamp ? (now - (parseInt(timestamp) * 1000)) : 'unknown';
+        const gatewayLatency = timestamp ? (workerStartTime - (parseInt(timestamp) * 1000)) : 'unknown';
+        const executionLatency = now - workerStartTime;
         
         // Cloudflare Specific Diagnostics
+        const rayId = request.headers.get('cf-ray') || 'Unknown';
         const colo = request.cf?.colo || 'Unknown';
         const city = request.cf?.city || 'Unknown City';
         const country = request.cf?.country || 'Unknown Country';
         const region = request.cf?.region || 'Unknown Region';
-        const host = request.headers.get('host') || 'Unknown Domain';
         const protocol = request.cf?.httpProtocol || 'Unknown';
         const asn = request.cf?.asn || 'Unknown';
+        const asOrg = request.cf?.asOrganization || 'Unknown';
+        const tlsVersion = request.cf?.tlsVersion || 'Unknown';
 
         const embed = {
             title: "🏓 Pong!",
             color: 0x00ff00,
             fields: [
-                { name: "📡 Interaction Latency", value: `\`${latency}ms\``, inline: true },
-                { name: "☁️ Cloudflare Node", value: `\`${colo}\``, inline: true },
-                { name: "🌐 Domain", value: `\`${host}\``, inline: true },
-                { name: "🛡️ Protocol", value: `\`${protocol}\``, inline: true },
-                { name: "🆔 ASN", value: `\`${asn}\``, inline: true },
+                { name: "📡 Gateway Latency", value: `
+${gatewayLatency}ms
+`, inline: true },
+                { name: "⚙️ Worker Execution", value: `
+${executionLatency}ms
+`, inline: true },
+                { name: "☁️ Cloudflare Node", value: `
+${colo}
+`, inline: true },
+                { name: "🆔 Ray ID", value: `
+${rayId}
+`, inline: false },
+                { name: "🛡️ Protocol", value: `
+${protocol}
+`, inline: true },
+                { name: "🔒 TLS Version", value: `
+${tlsVersion}
+`, inline: true },
+                { name: "🏢 ASN", value: `
+${asn} (${asOrg})
+`, inline: false },
                 { name: "🌍 Location", value: `${city}, ${region}, ${country}`, inline: false }
             ],
-            footer: { text: `App ID: ${DISCORD_APPLICATION_ID} • Serverless • Smart Placement` }
+            footer: { text: `Serverless • Smart Placement • Cloudflare Worker` }
         };
 
         return new Response(JSON.stringify({

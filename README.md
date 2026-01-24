@@ -46,6 +46,8 @@ npm run register
    npx wrangler secret put DISCORD_APPLICATION_ID
    npx wrangler secret put GEMINI_API_KEY
    npx wrangler secret put OWNER_IDS
+   npx wrangler secret put CLOUDFLARE_ACCOUNT_ID
+   npx wrangler secret put CLOUDFLARE_API_TOKEN
    ```
    *(The terminal will ask you to paste each key one by one.)*
 
@@ -56,10 +58,32 @@ npm run register
 
 ---
 
+## 🔄 How to Enable Automatic Updates
+To have your bot automatically redeploy when you modify code on GitHub, follow these steps:
+
+1. Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
+2. Click **New repository secret** and add the following keys (copy exact names):
+
+| Secret Name | Description |
+|:---|:---|
+| `CLOUDFLARE_API_TOKEN` | Create this in Cloudflare Dashboard -> My Profile -> API Tokens. Permissions: `Worker Scripts: Edit` and `Audit Logs: Read`. |
+| `CLOUDFLARE_ACCOUNT_ID`| Found in the Cloudflare Dashboard URL or sidebar. |
+| `DISCORD_TOKEN` | Your Bot Token. |
+| `DISCORD_PUBLIC_KEY` | Found in General Info of Discord Dev Portal. |
+| `DISCORD_APPLICATION_ID`| Found in General Info of Discord Dev Portal. |
+| `GEMINI_API_KEY` | Your AI Studio API Key. |
+| `OWNER_IDS` | Comma-separated user IDs (e.g., `12345,67890`) |
+
+Once these are set, any push to the `main` branch will automatically deploy your bot!
+
+---
+
 ## 🛠 Commands Included
 - `/gemini` - Chat with Gemini 3.
 - `/describe` - Detailed image description for accessibility.
-- `/ping` - Check latency and status.
+- `/ocr` - Extract text from images.
+- `/ping` - Check latency and Cloudflare diagnostics.
+- `/logs` - (Owner Only) View recent Cloudflare audit logs.
 - `/say` - (Owner Only) Send plaintext.
 - `/esay` - (Owner Only) Send JSON-formatted embeds.
 

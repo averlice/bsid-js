@@ -1,0 +1,25 @@
+name = "bsid-js"
+main = "src/server.js"
+compatibility_date = "2023-10-25"
+compatibility_flags = ["nodejs_compat"]
+
+routes = [
+	{ pattern = "ali.galaxy4productions.com", custom_domain = true }
+]
+
+[[kv_namespaces]]
+binding = "LOG_STORAGE"
+id = "cbd6be1c84a14d8a94e291bced12d3d7"
+
+[placement]
+mode = "smart"
+
+[vars]
+OWNER_IDS = "1365401272798281850,1017220455138066525,573794483121029120"
+# You will need to set these in your Cloudflare dashboard or .dev.vars for local dev
+# DISCORD_APPLICATION_ID = "..."
+# DISCORD_PUBLIC_KEY = "..."
+# DISCORD_TOKEN = "..."
+# GEMINI_API_KEY = "..."
+# CLOUDFLARE_ACCOUNT_ID = "..."
+# CLOUDFLARE_API_TOKEN = "..."

@@ -27,7 +27,7 @@ const commands = [
     options: [
         {
             name: 'model',
-            description: 'Specify the model to test (default: gemini-1.5-flash)',
+            description: 'Specify the model to test (default: gemini-3-flash-preview)',
             type: 3, // STRING
             required: false,
             choices: [
@@ -51,7 +51,7 @@ const commands = [
         },
         {
             name: 'model',
-            description: 'Specify the model to use (default: gemini-1.5-flash)',
+            description: 'Specify the model to use (default: gemini-3-flash-preview)',
             type: 3, // STRING
             required: false,
              choices: [
@@ -75,7 +75,7 @@ const commands = [
         },
         {
             name: 'model',
-            description: 'Specify the model to use (default: gemini-1.5-flash)',
+            description: 'Specify the model to use (default: gemini-3-flash-preview)',
             type: 3, // STRING
             required: false,
              choices: [
@@ -99,7 +99,7 @@ const commands = [
         },
         {
             name: 'model',
-            description: 'Specify the model to use (default: gemini-1.5-flash)',
+            description: 'Specify the model to use (default: gemini-3-flash-preview)',
             type: 3, // STRING
             required: false,
              choices: [

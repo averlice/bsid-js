@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 export async function generateGeminiResponse(prompt, apiKey, imageBuffer = null, mimeType = null, model = 'gemini-3-flash-preview') {
   if (!apiKey) {
     return "Error: GEMINI_API_KEY is not configured.";
@@ -10,7 +12,7 @@ export async function generateGeminiResponse(prompt, apiKey, imageBuffer = null,
 
   if (imageBuffer && mimeType) {
     // High-performance Base64 conversion for Cloudflare
-    const base64Image = btoa(Array.from(imageBuffer, byte => String.fromCharCode(byte)).join(''));
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
 
     parts.push({
       inline_data: {
@@ -27,7 +29,7 @@ export async function generateGeminiResponse(prompt, apiKey, imageBuffer = null,
   };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 50000); // 50 second timeout
 
   try {
     const response = await fetch(url, {

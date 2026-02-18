@@ -337,7 +337,7 @@ router.post('/', async (request, env, ctx) => {
                     GEMINI_API_KEY, 
                     new Uint8Array(arrayBuffer), 
                     attachment.content_type, 
-                    'gemini-3-flash-preview' // Default model for context menu
+                    model
                 );
                 return truncateMessage(`**Image Description:**\n${text}`);
             }

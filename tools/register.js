@@ -21,49 +21,24 @@ const commands = [
   },
   {
     name: 'test',
-    description: 'Tests connection to Gemini API.',
+    description: 'Tests connection to Cloudflare Workers AI.',
     integration_types: [0, 1],
     contexts: [0, 1, 2],
     options: [
         {
             name: 'model',
-            description: 'Specify the model to test (default: gemini-3-flash-preview)',
+            description: 'Specify the model to test (default: llama-vision)',
             type: 3, // STRING
             required: false,
             choices: [
-                { name: 'Gemini 3 Flash (Preview)', value: 'gemini-3-flash-preview' },
-                { name: 'Gemini 3 Pro (Preview)', value: 'gemini-3-pro-preview' }
-            ]
-        }
-    ]
-  },
-  {
-    name: 'gemini',
-    description: 'Ask Gemini a question',
-    integration_types: [0, 1],
-    contexts: [0, 1, 2],
-    options: [
-        {
-            name: 'prompt',
-            description: 'The prompt to send to Gemini',
-            type: 3, // STRING
-            required: true
-        },
-        {
-            name: 'model',
-            description: 'Specify the model to use (default: gemini-3-flash-preview)',
-            type: 3, // STRING
-            required: false,
-             choices: [
-                { name: 'Gemini 3 Flash (Preview)', value: 'gemini-3-flash-preview' },
-                { name: 'Gemini 3 Pro (Preview)', value: 'gemini-3-pro-preview' }
+                { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' }
             ]
         }
     ]
   },
   {
     name: 'describe',
-    description: 'Describes an attached image using Gemini.',
+    description: 'Describes an attached image using Cloudflare Workers AI.',
     integration_types: [0, 1],
     contexts: [0, 1, 2],
     options: [
@@ -75,19 +50,18 @@ const commands = [
         },
         {
             name: 'model',
-            description: 'Specify the model to use (default: gemini-3-flash-preview)',
+            description: 'Specify the model to use (default: llama-vision)',
             type: 3, // STRING
             required: false,
              choices: [
-                { name: 'Gemini 3 Flash (Preview)', value: 'gemini-3-flash-preview' },
-                { name: 'Gemini 3 Pro (Preview)', value: 'gemini-3-pro-preview' }
+                { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' }
             ]
         }
     ]
   },
   {
     name: 'ocr',
-    description: 'Extracts text from an image (Optical Character Recognition).',
+    description: 'Extracts text from an image using Cloudflare Workers AI.',
     integration_types: [0, 1],
     contexts: [0, 1, 2],
     options: [
@@ -99,12 +73,11 @@ const commands = [
         },
         {
             name: 'model',
-            description: 'Specify the model to use (default: gemini-3-flash-preview)',
+            description: 'Specify the model to use (default: llama-vision)',
             type: 3, // STRING
             required: false,
              choices: [
-                { name: 'Gemini 3 Flash (Preview)', value: 'gemini-3-flash-preview' },
-                { name: 'Gemini 3 Pro (Preview)', value: 'gemini-3-pro-preview' }
+                { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' }
             ]
         }
     ]
@@ -146,6 +119,10 @@ const commands = [
   {
     name: 'logs',
     description: 'Bot Owner Only: Fetches recent Cloudflare Audit Logs for this account.'
+  },
+  {
+    name: 'agree',
+    description: 'Bot Owner Only: Agrees to Meta\'s Llama 3.2 license for Workers AI.'
   },
 ];
 

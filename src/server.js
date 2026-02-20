@@ -1,6 +1,6 @@
 import { Router } from 'itty-router';
 import { InteractionResponseType, InteractionType } from 'discord-interactions';
-import { generateGeminiResponse } from './gemini.js';
+import { generateVisionResponse } from './workers_ai.js';
 import { handleAdminRequest } from './admin.js';
 
 const router = Router();
@@ -204,7 +204,7 @@ router.post('/', async (request, env, ctx) => {
         }), { headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (name === 'test' || name === 'gemini' || name === 'describe' || name === 'esay' || name === 'testembed' || name === 'ocr' || name === 'Describe Image') {
+    if (name === 'test' || name === 'describe' || name === 'esay' || name === 'testembed' || name === 'ocr' || name === 'Describe Image' || name === 'agree') {
         // Return Deferred Response IMMEDIATELY to stop timeouts
         // Flags: 64 makes it ephemeral (only user sees it)
         const response = new Response(JSON.stringify({ type: 5, data: { flags: 64 } }), { 
@@ -238,18 +238,31 @@ router.post('/', async (request, env, ctx) => {
                 }
             }
 
-            const model = (options?.find(o => o.name === 'model'))?.value || 'gemini-3-flash-preview';
+            const model = (options?.find(o => o.name === 'model'))?.value || 'llama-vision';
             
-            if (name === 'test') {
-                logInfo(env, `[Gemini] Testing API with model: ${model}`);
-                const text = await generateGeminiResponse("Test check. Is the API working?", GEMINI_API_KEY, null, null, model);
-                return `**Test Result (${model}):**\n${text}`;
+            if (name === 'agree') {
+                const ownerIds = env.OWNER_IDS ? env.OWNER_IDS.split(',') : [];
+                if (!ownerIds.includes(userId)) {
+                    return '❌ Error: This command is restricted to bot owners only.';
+                }
+
+                try {
+                    await env.AI.run("@cf/meta/llama-3.2-11b-vision-instruct", { prompt: "agree" });
+                    return "✅ **Success:** You have agreed to Meta's Llama 3.2 license for Cloudflare Workers AI.";
+                } catch (err) {
+                    return `❌ **Error:** Failed to agree to license: ${err.message}`;
+                }
             }
-            if (name === 'gemini') {
-                const prompt = (options?.find(o => o.name === 'prompt'))?.value;
-                logInfo(env, `[Gemini] Processing text prompt for ${username} with model ${model}`);
-                const text = await generateGeminiResponse(prompt, GEMINI_API_KEY, null, null, model);
-                return `**Prompt:** ${prompt}\n\n**Gemini (${model}):** ${text}`;
+
+            if (name === 'test') {
+                logInfo(env, `[AI] Testing API with model: ${model}`);
+                // For a simple test, we'll just send a text prompt to the vision model without an image
+                const text = await env.AI.run("@cf/meta/llama-3.2-11b-vision-instruct", {
+                    prompt: "Test check. Is the AI working?",
+                    max_tokens: 100
+                }).then(r => r.response || r).catch(e => `Error: ${e.message}`);
+                
+                return `**Test Result (${model}):**\n${text}`;
             }
             if (name === 'describe') {
                 const imgOption = options.find(o => o.name === 'image');
@@ -258,10 +271,12 @@ router.post('/', async (request, env, ctx) => {
                 const attachment = resolved.attachments[imgOption.value];
                 if (!attachment) return '❌ Error: Could not resolve image attachment.';
 
-                logInfo(env, `[Gemini] Describing image for ${username} (Size: ${attachment.size} bytes)`);
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**');
+                logInfo(env, `[AI] Describing image for ${username} (Size: ${attachment.size} bytes)`);
+                const [_, imageResp] = await Promise.all([
+                    updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**').catch(() => {}),
+                    fetch(attachment.url)
+                ]);
                 
-                const imageResp = await fetch(attachment.url);
                 if (!imageResp.ok) throw new Error(`Failed to download image from Discord (${imageResp.status})`);
 
                 const arrayBuffer = await imageResp.arrayBuffer();
@@ -269,9 +284,11 @@ router.post('/', async (request, env, ctx) => {
                     return '❌ Error: Image is too large (max 5MB).';
                 }
 
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with Gemini...**');
+                updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with AI...**').catch(() => {});
                 
-                const text = await generateGeminiResponse("Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.", GEMINI_API_KEY, new Uint8Array(arrayBuffer), attachment.content_type, model);
+                const descriptionPrompt = "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.";
+                const text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type);
+                
                 return truncateMessage(`**Image Description (${model}):**\n${text}`);
             }
 
@@ -282,9 +299,11 @@ router.post('/', async (request, env, ctx) => {
                 const attachment = resolved.attachments[imgOption.value];
                 if (!attachment) return '❌ Error: Could not resolve image attachment.';
 
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**');
+                const [_, imageResp] = await Promise.all([
+                    updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**').catch(() => {}),
+                    fetch(attachment.url)
+                ]);
                 
-                const imageResp = await fetch(attachment.url);
                 if (!imageResp.ok) throw new Error(`Failed to download image from Discord (${imageResp.status})`);
 
                 const arrayBuffer = await imageResp.arrayBuffer();
@@ -292,15 +311,11 @@ router.post('/', async (request, env, ctx) => {
                     return '❌ Error: Image is too large (max 5MB).';
                 }
 
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🔍 **Extracting text...**');
+                updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🔍 **Extracting text...**').catch(() => {});
                 
-                const text = await generateGeminiResponse(
-                    "Please extract all the text from this image exactly as it appears. Do not describe the image, just provide the text. If there is no text, say 'No text found'. Preserve the layout where possible.", 
-                    GEMINI_API_KEY, 
-                    new Uint8Array(arrayBuffer), 
-                    attachment.content_type, 
-                    model
-                );
+                const ocrPrompt = "Please extract all the text from this image exactly as it appears. Do not describe the image, just provide the text. If there is no text, say 'No text found'. Preserve the layout where possible.";
+                const text = await generateVisionResponse(ocrPrompt, env, arrayBuffer, attachment.content_type);
+
                 return truncateMessage(`**OCR Result (${model}):**\n${text}`);
             }
 
@@ -320,9 +335,11 @@ router.post('/', async (request, env, ctx) => {
                     return '❌ Error: The first attachment is not an image.';
                 }
 
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**');
+                const [_, imageResp] = await Promise.all([
+                    updateStatus(DISCORD_APPLICATION_ID, interaction.token, '📥 **Downloading image...**').catch(() => {}),
+                    fetch(attachment.url)
+                ]);
                 
-                const imageResp = await fetch(attachment.url);
                 if (!imageResp.ok) throw new Error(`Failed to download image from Discord (${imageResp.status})`);
 
                 const arrayBuffer = await imageResp.arrayBuffer();
@@ -330,15 +347,14 @@ router.post('/', async (request, env, ctx) => {
                     return '❌ Error: Image is too large (max 5MB).';
                 }
 
-                await updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with Gemini...**');
+                updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with AI...**').catch(() => {});
                 
-                const text = await generateGeminiResponse(
-                    "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.", 
-                    GEMINI_API_KEY, 
-                    new Uint8Array(arrayBuffer), 
-                    attachment.content_type, 
-                    model
-                );
+                let text;
+                const descriptionPrompt = "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.";
+                
+                // For context menu, use the default model (llama-vision)
+                text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type);
+                
                 return truncateMessage(`**Image Description:**\n${text}`);
             }
         };

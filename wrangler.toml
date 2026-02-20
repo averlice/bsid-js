@@ -1,5 +1,6 @@
 name = "bsid-js"
 main = "src/server.js"
+account_id = "533d313ef170042c947d37bf2ab123b8"
 compatibility_date = "2023-10-25"
 compatibility_flags = ["nodejs_compat"]
 
@@ -10,6 +11,9 @@ routes = [
 [[kv_namespaces]]
 binding = "LOG_STORAGE"
 id = "cbd6be1c84a14d8a94e291bced12d3d7"
+
+[ai]
+binding = "AI"
 
 [placement]
 mode = "smart"

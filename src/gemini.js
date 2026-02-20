@@ -25,7 +25,13 @@ export async function generateGeminiResponse(prompt, apiKey, imageBuffer = null,
   const payload = {
     contents: [{
       parts: parts
-    }]
+    }],
+    generationConfig: {
+      maxOutputTokens: 1024,
+      temperature: 0.2, // Lower temperature for more focused and potentially faster descriptions
+      topP: 0.8,
+      topK: 40
+    }
   };
 
   const controller = new AbortController();

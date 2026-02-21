@@ -1,14 +1,22 @@
-export async function generateVisionResponse(prompt, env, imageBuffer, mimeType) {
+export async function generateVisionResponse(prompt, env, imageBuffer, mimeType, modelAlias = 'llama-vision') {
   if (!env.AI) {
     throw new Error("Cloudflare AI binding is not configured.");
   }
+
+  // Map simplified alias to full model ID
+  const modelMap = {
+    'llama-vision': '@cf/meta/llama-3.2-11b-vision-instruct',
+    'gemma-3-27b': '@cf/google/gemma-3-27b-it'
+  };
+  
+  const modelId = modelMap[modelAlias] || modelMap['llama-vision'];
 
   // Use Uint8Array directly for Workers AI performance
   const imageData = new Uint8Array(imageBuffer);
 
   const runModel = async () => {
     return await env.AI.run(
-      "@cf/meta/llama-3.2-11b-vision-instruct",
+      modelId,
       {
         prompt: prompt,
         image: [...imageData],
@@ -18,10 +26,13 @@ export async function generateVisionResponse(prompt, env, imageBuffer, mimeType)
   };
 
   const agreeToLicense = async () => {
-      // Meta models often require the message structure even for 'agree'
-      return await env.AI.run("@cf/meta/llama-3.2-11b-vision-instruct", { 
-          messages: [{ role: "user", content: "agree" }] 
-      });
+      // Only Llama currently requires this specific 'agree' handshake in this way
+      if (modelAlias === 'llama-vision') {
+          return await env.AI.run(modelId, { 
+              messages: [{ role: "user", content: "agree" }] 
+          });
+      }
+      return null;
   };
 
   try {

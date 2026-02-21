@@ -256,8 +256,10 @@ router.post('/', async (request, env, ctx) => {
 
             if (name === 'test') {
                 logInfo(env, `[AI] Testing API with model: ${model}`);
-                // For a simple test, we'll just send a text prompt to the vision model without an image
-                const text = await env.AI.run("@cf/meta/llama-3.2-11b-vision-instruct", {
+                // Map simplified alias to full model ID for the test command
+                const modelId = model === 'gemma-3-27b' ? '@cf/google/gemma-3-27b-it' : '@cf/meta/llama-3.2-11b-vision-instruct';
+                
+                const text = await env.AI.run(modelId, {
                     prompt: "Test check. Is the AI working?",
                     max_tokens: 100
                 }).then(r => r.response || r).catch(e => `Error: ${e.message}`);
@@ -286,8 +288,11 @@ router.post('/', async (request, env, ctx) => {
 
                 updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with AI...**').catch(() => {});
                 
-                const descriptionPrompt = "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.";
-                const text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type);
+                const userPrompt = options.find(o => o.name === 'prompt')?.value;
+                const defaultPrompt = "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.";
+                const descriptionPrompt = userPrompt || defaultPrompt;
+                
+                const text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type, model);
                 
                 return truncateMessage(`**Image Description (${model}):**\n${text}`);
             }
@@ -314,7 +319,7 @@ router.post('/', async (request, env, ctx) => {
                 updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🔍 **Extracting text...**').catch(() => {});
                 
                 const ocrPrompt = "Please extract all the text from this image exactly as it appears. Do not describe the image, just provide the text. If there is no text, say 'No text found'. Preserve the layout where possible.";
-                const text = await generateVisionResponse(ocrPrompt, env, arrayBuffer, attachment.content_type);
+                const text = await generateVisionResponse(ocrPrompt, env, arrayBuffer, attachment.content_type, model);
 
                 return truncateMessage(`**OCR Result (${model}):**\n${text}`);
             }
@@ -349,11 +354,10 @@ router.post('/', async (request, env, ctx) => {
 
                 updateStatus(DISCORD_APPLICATION_ID, interaction.token, '🧠 **Analyzing with AI...**').catch(() => {});
                 
-                let text;
                 const descriptionPrompt = "Describe this image in detail for a blind user, focusing on the key objects, colors, and the overall scene. Keep the description under 2000 characters.";
                 
                 // For context menu, use the default model (llama-vision)
-                text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type);
+                const text = await generateVisionResponse(descriptionPrompt, env, arrayBuffer, attachment.content_type, 'llama-vision');
                 
                 return truncateMessage(`**Image Description:**\n${text}`);
             }

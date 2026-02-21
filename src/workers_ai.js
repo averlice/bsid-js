@@ -11,22 +11,30 @@ export async function generateVisionResponse(prompt, env, imageBuffer, mimeType,
   
   const modelId = modelMap[modelAlias] || modelMap['llama-vision'];
 
-  // Use Uint8Array directly for Workers AI performance
-  const imageData = new Uint8Array(imageBuffer);
+  // Convert buffer to base64 for data URI format
+  const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+  const dataUri = `data:${mimeType};base64,${base64Image}`;
 
   const runModel = async () => {
     return await env.AI.run(
       modelId,
       {
-        prompt: prompt,
-        image: [...imageData],
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: dataUri } }
+            ]
+          }
+        ],
         max_tokens: 1024
       }
     );
   };
 
   const agreeToLicense = async () => {
-      // Only Llama currently requires this specific 'agree' handshake in this way
+      // Only Llama currently requires this specific 'agree' handshake
       if (modelAlias === 'llama-vision') {
           return await env.AI.run(modelId, { 
               messages: [{ role: "user", content: "agree" }] 

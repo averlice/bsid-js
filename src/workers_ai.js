@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 export async function generateVisionResponse(prompt, env, imageBuffer, mimeType, modelAlias = 'llama-vision') {
   if (!env.AI) {
     throw new Error("Cloudflare AI binding is not configured.");
@@ -11,18 +13,19 @@ export async function generateVisionResponse(prompt, env, imageBuffer, mimeType,
   
   const modelId = modelMap[modelAlias] || modelMap['llama-vision'];
 
-  // Convert buffer to base64 for data URI format
-  const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+  // Convert buffer to base64 safely without stack overflow
+  const base64Image = Buffer.from(imageBuffer).toString('base64');
   const dataUri = `data:${mimeType};base64,${base64Image}`;
 
   const runModel = async () => {
     if (modelAlias === 'llama-vision') {
       // Llama 3.2 Vision on Cloudflare often performs better with this specific structure
+      // Safely convert to array using Array.from instead of spread to avoid stack issues
       return await env.AI.run(
         modelId,
         {
           prompt: prompt,
-          image: [...new Uint8Array(imageBuffer)],
+          image: Array.from(new Uint8Array(imageBuffer)),
           max_tokens: 1024
         }
       );

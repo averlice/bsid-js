@@ -16,21 +16,34 @@ export async function generateVisionResponse(prompt, env, imageBuffer, mimeType,
   const dataUri = `data:${mimeType};base64,${base64Image}`;
 
   const runModel = async () => {
-    return await env.AI.run(
-      modelId,
-      {
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: dataUri } }
-            ]
-          }
-        ],
-        max_tokens: 1024
-      }
-    );
+    if (modelAlias === 'llama-vision') {
+      // Llama 3.2 Vision on Cloudflare often performs better with this specific structure
+      return await env.AI.run(
+        modelId,
+        {
+          prompt: prompt,
+          image: [...new Uint8Array(imageBuffer)],
+          max_tokens: 1024
+        }
+      );
+    } else {
+      // Gemma 3 and others use the standard OpenAI-like multimodal messages
+      return await env.AI.run(
+        modelId,
+        {
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: dataUri } }
+              ]
+            }
+          ],
+          max_tokens: 1024
+        }
+      );
+    }
   };
 
   const agreeToLicense = async () => {

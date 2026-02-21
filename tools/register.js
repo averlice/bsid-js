@@ -50,20 +50,20 @@ const commands = [
             required: true
         },
         {
-            name: 'model',
-            description: 'Specify the model to use (default: llama-vision)',
-            type: 3, // STRING
-            required: false,
-             choices: [
-                { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' },
-                { name: 'Gemma 3 12B (Google)', value: 'gemma-3-12b' }
-            ]
-        },
-        {
             name: 'prompt',
             description: 'Optional: Custom instructions for the description (e.g. "be concise")',
             type: 3, // STRING
             required: false
+        },
+        {
+            name: 'model',
+            description: 'Specify the model to use (default: llama-vision)',
+            type: 3, // STRING
+            required: false,
+            choices: [
+                { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' },
+                { name: 'Gemma 3 12B (Google)', value: 'gemma-3-12b' }
+            ]
         }
     ]
   },

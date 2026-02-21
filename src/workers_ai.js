@@ -6,7 +6,7 @@ export async function generateVisionResponse(prompt, env, imageBuffer, mimeType,
   // Map simplified alias to full model ID
   const modelMap = {
     'llama-vision': '@cf/meta/llama-3.2-11b-vision-instruct',
-    'gemma-3-27b': '@cf/google/gemma-3-27b-it'
+    'gemma-3-12b': '@cf/google/gemma-3-12b-it'
   };
   
   const modelId = modelMap[modelAlias] || modelMap['llama-vision'];

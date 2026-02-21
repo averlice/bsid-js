@@ -257,7 +257,7 @@ router.post('/', async (request, env, ctx) => {
             if (name === 'test') {
                 logInfo(env, `[AI] Testing API with model: ${model}`);
                 // Map simplified alias to full model ID for the test command
-                const modelId = model === 'gemma-3-27b' ? '@cf/google/gemma-3-27b-it' : '@cf/meta/llama-3.2-11b-vision-instruct';
+                const modelId = model === 'gemma-3-12b' ? '@cf/google/gemma-3-12b-it' : '@cf/meta/llama-3.2-11b-vision-instruct';
                 
                 const text = await env.AI.run(modelId, {
                     prompt: "Test check. Is the AI working?",

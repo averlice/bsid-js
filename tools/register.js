@@ -32,7 +32,7 @@ const commands = [
             required: false,
             choices: [
                 { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' },
-                { name: 'Gemma 3 27B (Google)', value: 'gemma-3-27b' }
+                { name: 'Gemma 3 12B (Google)', value: 'gemma-3-12b' }
             ]
         }
     ]
@@ -56,7 +56,7 @@ const commands = [
             required: false,
              choices: [
                 { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' },
-                { name: 'Gemma 3 27B (Google)', value: 'gemma-3-27b' }
+                { name: 'Gemma 3 12B (Google)', value: 'gemma-3-12b' }
             ]
         },
         {
@@ -86,7 +86,7 @@ const commands = [
             required: false,
              choices: [
                 { name: 'Llama 3.2 11B Vision (Cloudflare)', value: 'llama-vision' },
-                { name: 'Gemma 3 27B (Google)', value: 'gemma-3-27b' }
+                { name: 'Gemma 3 12B (Google)', value: 'gemma-3-12b' }
             ]
         }
     ]

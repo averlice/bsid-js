@@ -201,14 +201,22 @@ router.post('/', async (request, env, ctx) => {
         return new Response(JSON.stringify({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: { embeds: [embed], flags: 64 }, // Ephemeral
-        }), { headers: { 'Content-Type': 'application/json' } });
+        }), { 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Link': '<https://discord.com>; rel=preconnect'
+            } 
+        });
     }
 
     if (name === 'test' || name === 'describe' || name === 'esay' || name === 'testembed' || name === 'ocr' || name === 'Describe Image' || name === 'agree') {
         // Return Deferred Response IMMEDIATELY to stop timeouts
         // Flags: 64 makes it ephemeral (only user sees it)
         const response = new Response(JSON.stringify({ type: 5, data: { flags: 64 } }), { 
-            headers: { 'Content-Type': 'application/json' } 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Link': '<https://discord.com>; rel=preconnect'
+            } 
         });
 
         const logic = async () => {

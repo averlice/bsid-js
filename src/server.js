@@ -186,7 +186,7 @@ router.post('/', async (request, env, ctx) => {
             title: "🏓 Pong!",
             color: 0x00ff00,
             fields: [
-                { name: "📡 Gateway Latency", value: `\`${gatewayLatency}ms\``, inline: true },
+                { name: "📡 Discord Gateway", value: `\`${gatewayLatency}ms\``, inline: true },
                 { name: "⚙️ Worker Execution", value: `\`${executionLatency}ms\``, inline: true },
                 { name: "☁️ Cloudflare Node", value: `\`${colo}\``, inline: true },
                 { name: "🆔 Ray ID", value: `\`${rayId}\``, inline: false },
@@ -195,7 +195,7 @@ router.post('/', async (request, env, ctx) => {
                 { name: "🏢 ASN", value: `\`${asn} (${asOrg})\``, inline: false },
                 { name: "🌍 Location", value: `${city}, ${region}, ${country}`, inline: false }
             ],
-            footer: { text: `Serverless • Smart Placement • Cloudflare Worker` }
+            footer: { text: `Serverless • Cloudflare Worker` }
         };
 
         return new Response(JSON.stringify({

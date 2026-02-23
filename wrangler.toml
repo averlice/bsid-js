@@ -15,9 +15,6 @@ id = "cbd6be1c84a14d8a94e291bced12d3d7"
 [ai]
 binding = "AI"
 
-[placement]
-mode = "smart"
-
 [vars]
 OWNER_IDS = "1365401272798281850,1017220455138066525,573794483121029120"
 # You will need to set these in your Cloudflare dashboard or .dev.vars for local dev
